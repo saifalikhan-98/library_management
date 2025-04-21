@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-6 text-center">WebSocket Notification Test</h1>
+
+        <!-- Connection Controls -->
+        <div class="mb-6">
+            <div class="flex mb-4">
+                <input type="text" id="wsUrl" class="flex-1 px-4 py-2 border border-gray-300 rounded-l-md"
+                    value="ws://localhost:8000/ws/notifications">
+                <input type="text" id="token" class="w-64 px-4 py-2 border-t border-b border-r border-gray-300"
+                    placeholder="JWT Token">
+            </div>
+
+            <div class="flex space-x-4">
+                <button id="connectBtn" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 flex-1">
+                    Connect
+                </button>
+                <button id="disconnectBtn" class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 flex-1" disabled>
+                    Disconnect
+                </button>
+            </div>
+
+            <div class="mt-2 text-center">
+                <span id="connectionStatus" class="text-gray-500">Not connected</span>
+            </div>
+        </div>
+
+        <!-- Message Display -->
+        <div class="border border-gray-200 rounded-md">
+            <div class="bg-gray-50 px-4 py-2 border-b border-gray-200 font-medium">
+                Received Messages
+            </div>
+            <div id="messagesContainer" class="p-4 h-80 overflow-y-auto space-y-2">
+                <div class="text-gray-500 text-center py-8">No messages received</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const messagesContainer = document.getElementById('messagesContainer');
+
+        // WebSocket connection
+        let socket = null;
+
+        // Add message to container
+        function addMessage(data) {
+            // Clear placeholder message if present
+            if (messagesContainer.querySelector('.text-gray-500')) {
+                messagesContainer.innerHTML = '';
+            }
+
+            try {
+                // Try to parse as JSON for pretty display
+                const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+                const formatted = JSON.stringify(parsed, null, 2);
+
+                const messageEl = document.createElement('div');
+                messageEl.className = 'bg-blue-50 border-l-4 border-blue-500 p-3 rounded';
+
+                const timeEl = document.createElement('div');
+                timeEl.className = 'text-xs text-gray-500 mb-1';
+                timeEl.textContent = new Date().toLocaleTimeString();
+
+                const contentEl = document.createElement('pre');
+                contentEl.className = 'text-sm whitespace-pre-wrap';
+                contentEl.textContent = formatted;
+
+                messageEl.appendChild(timeEl);
+                messageEl.appendChild(contentEl);
+                messagesContainer.appendChild(messageEl);
+            } catch (e) {
+                // If not valid JSON, display as plain text
+                const messageEl = document.createElement('div');
+                messageEl.className = 'bg-gray-50 p-3 rounded border border-gray-200';
+
+                const timeEl = document.createElement('div');
+                timeEl.className = 'text-xs text-gray-500 mb-1';
+                timeEl.textContent = new Date().toLocaleTimeString();
+
+                const contentEl = document.createElement('div');
+                contentEl.className = 'text-sm';
+                contentEl.textContent = data;
+
+                messageEl.appendChild(timeEl);
+                messageEl.appendChild(contentEl);
+                messagesContainer.appendChild(messageEl);
+            }
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Connect to WebSocket
+        connectBtn.addEventListener('click', function() {
+            const wsUrl = document.getElementById('wsUrl').value.trim();
+            const token = document.getElementById('token').value.trim();
+
+            if (!wsUrl) {
+                alert('WebSocket URL is required');
+                return;
+            }
+
+            try {
+                socket = new WebSocket(wsUrl);
+
+                socket.onopen = function() {
+                    connectionStatus.textContent = 'Connected';
+                    connectionStatus.className = 'text-green-600 font-medium';
+
+                    // Send authentication token
+                    socket.send(JSON.stringify({ token: token }));
+
+                    // Update UI
+                    connectBtn.disabled = true;
+                    disconnectBtn.disabled = false;
+                };
+
+                socket.onmessage = function(event) {
+                    addMessage(event.data);
+                };
+
+                socket.onerror = function(error) {
+                    connectionStatus.textContent = 'Error';
+                    connectionStatus.className = 'text-red-600 font-medium';
+                    addMessage(`WebSocket error occurred`);
+                };
+
+                socket.onclose = function(event) {
+                    connectionStatus.textContent = 'Disconnected';
+                    connectionStatus.className = 'text-red-600 font-medium';
+
+                    // Update UI
+                    connectBtn.disabled = false;
+                    disconnectBtn.disabled = true;
+
+                    socket = null;
+                };
+
+            } catch (e) {
+                connectionStatus.textContent = 'Connection failed';
+                connectionStatus.className = 'text-red-600 font-medium';
+                alert(`Error creating WebSocket: ${e.message}`);
+            }
+        });
+
+        // Disconnect from WebSocket
+        disconnectBtn.addEventListener('click', function() {
+            if (socket) {
+                socket.close();
+            }
+        });
+    </script>
+</body>
+</html>
