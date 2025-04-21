@@ -71,7 +71,7 @@ The easiest way to run the application is using Docker Compose, which will set u
 You can also use the pre-built Docker image from Docker Hub:
 
 ```bash
-docker pull yourusername/library-management:latest
+docker pull saifalikhan98/library-management-system:latest
 
 docker run -d \
   -p 8000:8000 \
@@ -88,34 +88,11 @@ docker run -d \
   -e POSTGRES_USER= \
   -e POSTGRES_PASSWORD= \
   -e POSTGRES_DB= \
-  yourusername/library-management:latest
+  saifalikhan98/library-management-system:latest
 ```
 
 Note: You'll need to set up PostgreSQL and Redis separately when using this method.
 
-### Building and Publishing Your Docker Image
-
-If you want to build and publish your own Docker image for others to use, follow these steps:
-
-1. **Login to Docker Hub**
-   ```bash
-   docker login
-   ```
-
-2. **Build your Docker image**
-   ```bash
-   docker build -t library-management-system:latest .
-   ```
-
-3. **Tag your image**
-   ```bash
-   docker tag library-management-system:latest yourusername/library-management-system:latest
-   ```
-
-4. **Push your image to Docker Hub**
-   ```bash
-   docker push saifalikhan98/library-management-system:latest
-   ```
 
 For more detailed instructions on building and publishing Docker images, see the [Docker Image Build and Upload Instructions](./DOCKER.md) file.
 

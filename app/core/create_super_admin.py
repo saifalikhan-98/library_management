@@ -8,6 +8,7 @@ from app.models.user import User
 from app.models.role import Role
 
 from app.config import settings
+from app.utils.constants import ADMIN_ACCESS_LEVEL, USER_ACCESS_LEVEL, LIBRARIAN_ACCESS_LEVEL
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +18,9 @@ async def create_admin_user():
     try:
 
         roles = {
-            "user": {"description": "Regular library user with basic permissions", "access_level": 1},
-            "librarian": {"description": "Library staff with advanced book management permissions", "access_level": 2},
-            "admin": {"description": "Administrator with full system access", "access_level": 3}
+            "user": {"description": "Regular library user with basic permissions", "access_level": USER_ACCESS_LEVEL},
+            "librarian": {"description": "Library staff with advanced book management permissions", "access_level": LIBRARIAN_ACCESS_LEVEL},
+            "admin": {"description": "Administrator with full system access", "access_level": ADMIN_ACCESS_LEVEL}
         }
 
         # Create roles if they don't exist
@@ -39,14 +40,15 @@ async def create_admin_user():
         admin_user = db.query(User).filter(User.username == admin_username).first()
 
         if not admin_user:
-            #1 stands for admin access role
-            admin_role = db.query(Role).filter(Role.access_level == 1).first()
+
+            admin_role = db.query(Role).filter(Role.access_level == ADMIN_ACCESS_LEVEL).first()
 
             if not admin_role:
                 logger.error("Admin role not found. Cannot create admin user.")
                 return
 
-            logger.info(f"Creating Admin user")
+            logger.info(f"Creating Admin user",)
+
             password=settings.ADMIN_INITIAL_PASSWORD
             password_bytes = password.encode('utf-8')
             salt = bcrypt.gensalt()
