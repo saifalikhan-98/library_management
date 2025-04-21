@@ -60,7 +60,7 @@ async def list_users(
         role_type: Optional[str] = Query(None,
                                          description="Filter by role type: 'staff', 'admin', 'candidate', or leave empty for all"),
         db: Session = Depends(get_db),
-        current_user: UserToken = Depends(require_role(min_access_level=ADMIN_ACCESS_LEVEL))
+        _: UserToken = Depends(require_role(min_access_level=ADMIN_ACCESS_LEVEL))
 ):
     user_service = AdminServices(db)
     results = user_service.list_users(

@@ -17,7 +17,7 @@ router = APIRouter()
 @router.post("/register", response_model=UserResponse)
 async def register_user(user_data:UserCreate, db: Session = Depends(get_db)):
     user_service = UserService(db)
-    results=user_service.create_user(user_create=user_data)
+    results=user_service.create_candidate_user(user_create=user_data)
     return results
 
 @router.post("/reset-key/{username}", response_model=KeyResponse)

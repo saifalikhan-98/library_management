@@ -83,6 +83,12 @@ class CoreManagementService(ABC):
                     detail="Incorrect current password"
                 )
 
+        if db_user is None:
+            raise HTTPException(
+                status_code=404,
+                detail="User not found"
+            )
+
         hashed_password = self.get_password_hash(password_update.new_password)
         db_user.password = hashed_password
 

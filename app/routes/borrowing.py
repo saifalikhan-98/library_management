@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, Path, status
+from fastapi import APIRouter, Depends, Query, Path, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
@@ -32,13 +32,15 @@ async def borrow_book(
 
 @router.put("/{borrowing_id}/return",response_model=BorrowingResponse)
 async def return_book(
+        background_tasks: BackgroundTasks,
         borrowing_id: int = Path(..., ge=1),
         db: Session = Depends(get_db),
         _:UserToken = Depends(require_role(min_access_level=USER_ACCESS_LEVEL,api_key_required=True))
 ):
     return BorrowingService().return_book(
         db=db,
-        borrowing_id=borrowing_id
+        borrowing_id=borrowing_id,
+        background_tasks=background_tasks
     )
 
 

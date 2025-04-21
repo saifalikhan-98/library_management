@@ -144,7 +144,7 @@ class BorrowingService:
 
         return borrowing
 
-    def return_book(self, db: Session,borrowing_id: int) -> Borrowing:
+    def return_book(self, db: Session,borrowing_id: int, background_tasks:BackgroundTasks) -> Borrowing:
 
         borrowing = db.query(Borrowing).filter(
             Borrowing.borrowing_id == borrowing_id
@@ -168,18 +168,17 @@ class BorrowingService:
 
 
         book = self.__book_service.get_book(db, borrowing.book_id)
-        if book.total_copies<book.available_copies:
+
+        if book.available_copies<book.total_copies:
             book.available_copies += 1
 
 
         db.commit()
         db.refresh(borrowing)
 
-        BackgroundTasks.add_task(
-            self._process_next_request_in_queue,
-            db_session=db,
-            book_id=borrowing.book_id
-        )
+
+        self._process_next_request_in_queue(db, book.book_id)
+
 
         return borrowing
 

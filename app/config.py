@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str
     REDIS_HOST: str
     REDIS_PORT: int
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str
 
     class Config:
         env_file = os.path.join(ROOT_DIR, ".env")
